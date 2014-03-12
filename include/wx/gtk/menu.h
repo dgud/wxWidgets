@@ -88,6 +88,7 @@ public:
     GtkWidget       *m_menu;  // GtkMenu
     GtkWidget       *m_owner;
     GtkAccelGroup   *m_accel;
+    GtkAccelGroup   *m_accel_ignored;
     bool m_popupShown;
 
 protected:

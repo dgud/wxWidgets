@@ -1917,7 +1917,8 @@ enum wxBorder
 /*
  * wxMenu style flags
  */
-#define wxMENU_TEAROFF      0x0001
+#define wxMENU_TEAROFF              0x0001
+#define wxMENU_DISABLE_ACCELERATORS 0x0002
 
 /*
  * Apply to all panel items

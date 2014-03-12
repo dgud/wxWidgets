@@ -272,6 +272,8 @@ public:
     // style
     long GetStyle() const { return m_style; }
 
+    bool IsAcceleratorsEnabled() const { return ! (m_style & wxMENU_DISABLE_ACCELERATORS); }
+
     // implementation helpers
     // ----------------------
 

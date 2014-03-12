@@ -36,7 +36,9 @@ enum
 
     TestAccelA,
     TestAccelCtrlA,
-    TestAccelEsc
+    TestAccelEsc,
+    TestAccelDisable,
+    TestAccelDisable2
 };
 
 // Define a new frame type: this is going to be our main frame
@@ -58,6 +60,10 @@ private:
         { m_logText->AppendText("Test accelerator \"Ctrl-A\" used.\n"); }
     void OnTestAccelEsc(wxCommandEvent& WXUNUSED(event))
         { m_logText->AppendText("Test accelerator \"Esc\" used.\n"); }
+
+  void OnTestAccelDisable(wxCommandEvent& WXUNUSED(event))
+  { m_logText->AppendText("Disabled Accel invoked.\n"); }
+
 
     void OnClear(wxCommandEvent& WXUNUSED(event)) { m_logText->Clear(); }
     void OnSkipDown(wxCommandEvent& event) { m_skipDown = event.IsChecked(); }
@@ -180,12 +186,18 @@ MyFrame::MyFrame(const wxString& title)
     menuFile->Append(QuitID, "E&xit\tAlt-X", "Quit this program");
 
     // the "About" item should be in the help menu
+    wxMenu *menuTest = new wxMenu(wxMENU_DISABLE_ACCELERATORS);
+    menuTest->Append(TestAccelDisable, "Test Accel Disable\tCtrl-D", "Test Accel Disabled");
+    menuTest->Append(TestAccelDisable2, "Test2\tF3", "Test Accel Disabled2");
+
+    // the "About" item should be in the help menu
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT, "&About\tF1", "Show about dialog");
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(menuFile, "&File");
+    menuBar->Append(menuTest, "&Test");
     menuBar->Append(menuHelp, "&Help");
 
     // ... and attach this menu bar to the frame
@@ -249,6 +261,10 @@ MyFrame::MyFrame(const wxString& title)
 
     Connect(TestAccelEsc, wxEVT_MENU,
             wxCommandEventHandler(MyFrame::OnTestAccelEsc));
+
+    Connect(TestAccelDisable, TestAccelDisable2, wxEVT_MENU,
+            wxCommandEventHandler(MyFrame::OnTestAccelDisable));
+
 
     // notice that we don't connect OnCharHook() to the input window, unlike
     // the usual key events this one is propagated upwards

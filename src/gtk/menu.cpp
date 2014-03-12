@@ -44,6 +44,7 @@ extern "C"
 
 #if wxUSE_ACCEL
 static void wxGetGtkAccel(const wxMenuItem*, guint*, GdkModifierType*);
+static wxString GetGtkHotKey( const wxMenuItem&  );
 #endif
 
 // Unity hack: under Ubuntu Unity the global menu bar is not affected by a
@@ -684,11 +685,18 @@ void wxMenuItem::SetItemLabel( const wxString& str )
         // remove old accelerator
         guint accel_key;
         GdkModifierType accel_mods;
+
         wxGetGtkAccel(this, &accel_key, &accel_mods);
         if (accel_key)
         {
-            gtk_widget_remove_accelerator(
-                m_menuItem, GetRootParentMenu(m_parentMenu)->m_accel, accel_key, accel_mods);
+	  GtkAccelGroup *accel = NULL;
+	  if(m_parentMenu->IsAcceleratorsEnabled()) {
+	    accel = GetRootParentMenu(m_parentMenu)->m_accel;
+	  } else {
+	    accel = m_parentMenu->m_accel_ignored;
+	  }
+
+	  gtk_widget_remove_accelerator(m_menuItem, accel, accel_key, accel_mods);
         }
     }
 #endif // wxUSE_ACCEL
@@ -708,9 +716,14 @@ void wxMenuItem::SetGtkLabel()
     wxGetGtkAccel(this, &accel_key, &accel_mods);
     if (accel_key)
     {
-        gtk_widget_add_accelerator(
-            m_menuItem, "activate", GetRootParentMenu(m_parentMenu)->m_accel,
-            accel_key, accel_mods, GTK_ACCEL_VISIBLE);
+      GtkAccelGroup *accel = NULL;
+      if(m_parentMenu->IsAcceleratorsEnabled()) {
+	accel = GetRootParentMenu(m_parentMenu)->m_accel;
+      } else {
+	accel = m_parentMenu->m_accel_ignored;
+      }
+      gtk_widget_add_accelerator(m_menuItem, "activate", accel,
+				 accel_key, accel_mods, GTK_ACCEL_VISIBLE);
     }
 #endif // wxUSE_ACCEL
 }
@@ -807,6 +820,7 @@ void wxMenu::Init()
     m_popupShown = false;
 
     m_accel = gtk_accel_group_new();
+    m_accel_ignored = gtk_accel_group_new();
     m_menu = gtk_menu_new();
     g_object_ref_sink(m_menu);
 
@@ -852,6 +866,7 @@ wxMenu::~wxMenu()
 
     g_object_unref(m_menu);
     g_object_unref(m_accel);
+    g_object_unref(m_accel_ignored);
 }
 
 void wxMenu::SetLayoutDirection(const wxLayoutDirection dir)
