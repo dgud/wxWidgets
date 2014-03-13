@@ -466,7 +466,9 @@ bool wxMenu::MSWGetRadioGroupRange(int pos, int *start, int *end) const
 bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 {
 #if wxUSE_ACCEL
-    UpdateAccel(pItem);
+    if(IsAcceleratorsEnabled()) {
+	UpdateAccel(pItem);
+    }
 #endif // wxUSE_ACCEL
 
     // we should support disabling the item even prior to adding it to the menu
