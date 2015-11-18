@@ -55,6 +55,8 @@ public:
     // initialization (doing it here and not in the ctor allows to have an error
     // return: if OnInit() returns false, the application terminates)
     virtual bool OnInit();
+    void OnIdle(wxIdleEvent& event);
+    wxFrame *frame;
 };
 
 // Define a new frame type: this is going to be our main frame
@@ -67,6 +69,8 @@ public:
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+    void OnMove(wxMoveEvent& event);
+    void OnSize(wxSizeEvent& event);
 
 private:
     // any class wishing to process wxWidgets events must use this macro
@@ -124,8 +128,10 @@ bool MyApp::OnInit()
     if ( !wxApp::OnInit() )
         return false;
 
+    Connect(wxID_ANY, wxEVT_IDLE, (wxObjectEventFunction) (wxEventFunction) &MyApp::OnIdle);
+
     // create the main application window
-    MyFrame *frame = new MyFrame("Minimal wxWidgets App");
+    frame = new MyFrame("Minimal wxWidgets App");
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -167,6 +173,9 @@ MyFrame::MyFrame(const wxString& title)
     SetMenuBar(menuBar);
 #endif // wxUSE_MENUS
 
+    Connect(wxID_ANY, wxEVT_MOVE, (wxObjectEventFunction) (wxEventFunction) &MyFrame::OnMove);
+    Connect(wxID_ANY, wxEVT_SIZE, (wxObjectEventFunction) (wxEventFunction) &MyFrame::OnSize);
+
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
@@ -176,6 +185,23 @@ MyFrame::MyFrame(const wxString& title)
 
 
 // event handlers
+
+void MyApp::OnIdle(wxIdleEvent& WXUNUSED(event))
+{
+    frame->SetStatusText("OnIdle");
+}
+
+void MyFrame::OnMove(wxMoveEvent& WXUNUSED(event))
+{
+    SetStatusText("OnMove");
+    wxWakeUpIdle(); // Called from another thread after OnMove returned
+}
+
+void MyFrame::OnSize(wxSizeEvent& WXUNUSED(event))
+{
+    SetStatusText("OnSize");
+    wxWakeUpIdle(); // Called from another thread after OnMove returned
+}
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
