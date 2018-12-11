@@ -64,6 +64,7 @@ public:
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnMouse(wxMouseEvent& event);
+    void OnKey(wxKeyEvent& event);
 
 private:
     // Members

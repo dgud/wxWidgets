@@ -427,8 +427,10 @@ MyGLCanvas::MyGLCanvas(MyFrame* parent, const wxGLAttributes& canvasAttrs)
 #if wxUSE_LOGWINDOW
         wxLogMessage("OpenGL Core Profile 3.2 successfully set.");
 #endif // wxUSE_LOGWINDOW
+	this->Bind(wxEVT_KEY_DOWN, &MyGLCanvas::OnKey, this);
+	this->Bind(wxEVT_KEY_UP, &MyGLCanvas::OnKey, this);
+	this->Bind(wxEVT_CHAR, &MyGLCanvas::OnKey, this);
     }
-
 }
 
 MyGLCanvas::~MyGLCanvas()
@@ -597,3 +599,14 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
     }
 }
 
+void MyGLCanvas::OnKey(wxKeyEvent& event)
+{
+    if(event.GetEventType() == wxEVT_CHAR)
+	wxLogMessage( "%p OnKey char %c", this, event.GetKeyCode());
+    if(event.GetEventType() == wxEVT_KEY_UP)
+	wxLogMessage( "%p OnKey key up %c", this, event.GetKeyCode());
+    if(event.GetEventType() == wxEVT_KEY_DOWN)
+	wxLogMessage( "%p OnKey key down %c", this, event.GetKeyCode());
+
+    event.Skip();
+}
