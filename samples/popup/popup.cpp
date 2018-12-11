@@ -82,6 +82,7 @@ private:
 
 private:
     void OnMouse( wxMouseEvent &event );
+    void OnKey( wxKeyEvent &event );
     void OnSize( wxSizeEvent &event );
     void OnSetFocus( wxFocusEvent &event );
     void OnKillFocus( wxFocusEvent &event );
@@ -117,6 +118,11 @@ SimpleTransientPopup::SimpleTransientPopup( wxWindow *parent, bool scrolled )
     // you're making a control like a combobox where the items are highlighted
     // under the cursor, the m_panel is set focus in the Popup() function
     m_panel->Bind(wxEVT_MOTION, &SimpleTransientPopup::OnMouse, this);
+    m_panel->Bind(wxEVT_LEFT_UP, &SimpleTransientPopup::OnMouse, this);
+    m_panel->Bind(wxEVT_LEFT_DOWN, &SimpleTransientPopup::OnMouse, this);
+    m_panel->Bind(wxEVT_RIGHT_UP, &SimpleTransientPopup::OnMouse, this);
+    m_panel->Bind(wxEVT_RIGHT_DOWN, &SimpleTransientPopup::OnMouse, this);
+    m_panel->Bind(wxEVT_CHAR_HOOK, &SimpleTransientPopup::OnKey, this);
 
     wxStaticText *text = new wxStaticText( m_panel, wxID_ANY,
                           "wxPopupTransientWindow is a\n"
@@ -210,24 +216,46 @@ void SimpleTransientPopup::OnKillFocus(wxFocusEvent &event)
     event.Skip();
 }
 
+void SimpleTransientPopup::OnKey(wxKeyEvent &event)
+{
+  wxLogMessage( "%p SimpleTransientPopup::OnKey (%c)", this, event.GetKeyCode());
+  if(event.GetKeyCode() == WXK_ESCAPE)
+    Dismiss();
+  else
+    event.Skip();
+}
+
 void SimpleTransientPopup::OnMouse(wxMouseEvent &event)
 {
-    wxRect rect(m_mouseText->GetRect());
-    rect.SetX(-100000);
-    rect.SetWidth(1000000);
-    wxColour colour(*wxLIGHT_GREY);
-
-    if (rect.Contains(event.GetPosition()))
+    if(event.IsButton())
     {
-        colour = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-        wxLogMessage( "%p SimpleTransientPopup::OnMouse pos(%d, %d)",
-                      event.GetEventObject(), event.GetX(), event.GetY());
-    }
+      if(event.LeftDown())
+        wxLogMessage( "%p SimpleTransientPopup::OnMouse left down(%d, %d)", this, event.GetX(), event.GetY());
+      if(event.LeftUp())
+        wxLogMessage( "%p SimpleTransientPopup::OnMouse left up(%d, %d)", this, event.GetX(), event.GetY());
 
-    if (colour != m_mouseText->GetBackgroundColour())
-    {
-        m_mouseText->SetBackgroundColour(colour);
-        m_mouseText->Refresh();
+      if(event.RightDown())
+        wxLogMessage( "%p SimpleTransientPopup::OnMouse Right down(%d, %d)", this, event.GetX(), event.GetY());
+      if(event.RightUp())
+        wxLogMessage( "%p SimpleTransientPopup::OnMouse Right up(%d, %d)", this, event.GetX(), event.GetY());
+    } else {
+      wxRect rect(m_mouseText->GetRect());
+      rect.SetX(-100000);
+      rect.SetWidth(1000000);
+      wxColour colour(*wxLIGHT_GREY);
+
+      if (rect.Contains(event.GetPosition()))
+        {
+          colour = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+          wxLogMessage( "%p SimpleTransientPopup::OnMouse pos(%d, %d)",
+                        event.GetEventObject(), event.GetX(), event.GetY());
+        }
+
+      if (colour != m_mouseText->GetBackgroundColour())
+        {
+          m_mouseText->SetBackgroundColour(colour);
+          m_mouseText->Refresh();
+        }
     }
     event.Skip();
 }
